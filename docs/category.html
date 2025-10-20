@@ -41,9 +41,11 @@
                 </a>
             </div>
             <h2 id="categoryTitle" class="inline-flex text-3xl text-gray-100 font-bold mb-2 border-b-2 border-gray-500 pb-2">
-
             </h2>
-            <p id="endpointCount" class="text-gray-500 text-xs mt-2"></p>
+            <span 
+                id="endpointCount"
+                class="ml-3 px-3 py-2 text-sm font-bold text-gray-100 bg-blue-600"
+            ></span>
         </div>
 
         <div class="flex items-center justify-between mb-4">
@@ -145,7 +147,6 @@
                 const text = element.textContent;
                 navigator.clipboard.writeText(text).then(() => {
                     console.log('Copied to clipboard');
-                    // Optionally, show a temporary message or change button text/icon
                 }).catch(err => {
                     console.error('Failed to copy: ', err);
                 });
@@ -409,10 +410,10 @@
                     document.getElementById('apiList').style.display = 'none';
                     return;
                 }
-                const capitalizedName = category.name.charAt(0).toUpperCase() + category.name.slice(1);
-                document.title = `${capitalizedName} - ${setData.name}.`;
+                const capitalizedName = category.name.charAt(0).toUpperCase() + category.name.slice(1) + '.';
+                document.title = `${capitalizedName} - ${setData.name}`;
                 document.getElementById('categoryTitle').textContent = capitalizedName;
-                document.getElementById('endpointCount').textContent = `${category.items.length} endpoints available`;
+                document.getElementById('endpointCount').textContent = `${category.items.length} Endpoints`;
                 const apiList = document.getElementById('apiList');
                 apiList.innerHTML = '';
                 let index = 0;

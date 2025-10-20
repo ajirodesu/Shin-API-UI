@@ -1,11 +1,12 @@
 {
   "name": "shin-api-ui",
   "version": "1.0.0",
-  "description": "Open Source User Interface for GET Endpoints backend",
+  "description": "Open-source user interface for GET endpoints backend.",
   "main": "index.js",
   "type": "commonjs",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "dev": "nodemon index.js"
   },
   "author": "AjiroDesu",
   "license": "MIT",
@@ -15,5 +16,8 @@
     "cheerio": "^1.0.0",
     "express": "^4.19.2",
     "node-fetch": "^2.6.7"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
   }
 }
