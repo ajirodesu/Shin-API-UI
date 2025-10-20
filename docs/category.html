@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="theme-color" content="#111827">
+    <title>Category - </title>
+    <link rel="icon" href="" type="image/png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono:ital,wght@0,400;0,700;1,400;1,700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'mono': ['Ubuntu Mono', 'monospace'],
+                        'sans': ['Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar {
+            display: none !important;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-200 antialiased font-mono min-h-screen">
+    <header class="sticky top-0 z-50 bg-gray-900 border-b border-gray-700 py-5"></header>
+
+    <main class="max-w-2xl mx-auto px-8 py-9">
+        <div class="text-left mb-6">
+            <div>
+                <a href="/" class="inline-flex items-center text-xs text-gray-500 hover:text-gray-300 mb-4">
+                    <span class="material-icons text-sm mr-2">arrow_back</span>
+                    Back to Categories
+                </a>
+            </div>
+            <h2 id="categoryTitle" class="inline-flex text-3xl text-gray-100 font-bold mb-2 border-b-2 border-gray-500 pb-2">
+
+            </h2>
+            <p id="endpointCount" class="text-gray-500 text-xs mt-2"></p>
+        </div>
+
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex-1 relative">
+                <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                    <span class="material-icons text-gray-500 text-lg">search</span>
+                </div>
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    placeholder="Search endpoints..." 
+                    class="w-full pl-12 pr-5 py-4 text-sm border border-gray-700 bg-gray-800 text-gray-100 placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                >
+            </div>
+        </div>
+
+        <div id="content" class="space-y-4">
+            <div id="noResults" class="text-center py-16" style="display: none;">
+                <div class="max-w-md mx-auto">
+                    <h3 class="text-xs text-gray-500 mb-2">No result found.</h3>
+                </div>
+            </div>
+
+            <div id="apiList" class="space-y-3">
+            </div>
+        </div>
+
+        <div class="flex flex-col mt-6">
+            <p class="text-gray-500 text-xs">Thx To All Users And Contributors.</p>
+            <p id="footerCopyright" class="text-gray-500 text-xs"></p>
+        </div>
+
+        <style>
+            .slide-down {
+                animation: slideDown 0.15s ease-out;
+            }
+            .slide-up {
+                animation: slideUp 0.15s ease-out;
+            }
+            @keyframes slideDown {
+                from { opacity: 0; transform: translateY(-10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            @keyframes slideUp {
+                from { opacity: 1; transform: translateY(0); }
+                to { opacity: 0; transform: translateY(-10px); }
+            }
+            .truncate {
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+            }
+        </style>
+
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <script>
+            let searchInput, noResults, apiList;
+
+            function toggleEndpoint(endpointIndex) {
+                const content = document.getElementById(`endpoint-${endpointIndex}`);
+                const icon = document.getElementById(`endpoint-icon-${endpointIndex}`);
+
+                if (content.classList.contains('hidden')) {
+                    content.classList.remove('hidden');
+                    content.classList.add('slide-down');
+                    icon.style.transform = 'rotate(180deg)';
+                } else {
+                    content.classList.add('slide-up');
+                    icon.style.transform = 'rotate(0deg)';
+                    setTimeout(() => {
+                        content.classList.add('hidden');
+                        content.classList.remove('slide-up', 'slide-down');
+                    }, 150);
+                }
+            }
+
+            function clearResponse(endpointIndex) {
+                const responseElement = document.getElementById(`response-${endpointIndex}`);
+                const responseContent = document.getElementById(`response-content-${endpointIndex}`);
+                const curlElement = document.getElementById(`curl-${endpointIndex}`);
+                const curlContent = document.getElementById(`curl-content-${endpointIndex}`);
+                const clearButton = document.getElementById(`clear-${endpointIndex}`);
+
+                responseElement.classList.add('slide-up');
+                curlElement.classList.add('slide-up');
+                setTimeout(() => {
+                    responseElement.classList.add('hidden');
+                    responseElement.classList.remove('slide-up', 'slide-down');
+                    responseContent.innerHTML = '';
+                    curlElement.classList.add('hidden');
+                    curlElement.classList.remove('slide-up', 'slide-down');
+                    curlContent.textContent = '';
+                    clearButton.classList.add('hidden');
+                }, 150);
+            }
+
+            function copyToClipboard(elementId) {
+                const element = document.getElementById(elementId);
+                const text = element.textContent;
+                navigator.clipboard.writeText(text).then(() => {
+                    console.log('Copied to clipboard');
+                    // Optionally, show a temporary message or change button text/icon
+                }).catch(err => {
+                    console.error('Failed to copy: ', err);
+                });
+            }
+
+            async function executeRequest(event, endpointIndex, method, path, contentType) {
+                event.preventDefault();
+
+                const form = event.target;
+                const responseElement = document.getElementById(`response-${endpointIndex}`);
+                const responseContent = document.getElementById(`response-content-${endpointIndex}`);
+                const clearButton = document.getElementById(`clear-${endpointIndex}`);
+                const copyResponseButton = document.getElementById(`copy-response-${endpointIndex}`);
+
+                let fullUrl = window.location.origin + path;
+                const formData = new FormData(form);
+
+                const curlElement = document.getElementById(`curl-${endpointIndex}`);
+                let curlCommand = `curl -X ${method}`;
+
+                for (let [key, value] of formData.entries()) {
+                    if (key.startsWith('route_')) {
+                        const paramName = key.replace('route_', '');
+                        const placeholder = ':' + paramName;
+                        fullUrl = fullUrl.replace(placeholder, encodeURIComponent(value));
+                        path = path.replace(placeholder, encodeURIComponent(value));
+                    }
+                }
+
+                curlCommand += ` "${fullUrl}"`;
+
+                try {
+                    let axiosConfig = {
+                        method: method,
+                        url: fullUrl,
+                        headers: {}
+                    };
+
+                    if (method === 'GET' || method === 'HEAD') {
+                        const params = {};
+                        for (let [key, value] of formData.entries()) {
+                            if (value && key !== 'body' && !key.startsWith('route_')) {
+                                params[key] = value;
+                            }
+                        }
+                        if (Object.keys(params).length > 0) {
+                            axiosConfig.params = params;
+                            const urlParams = new URLSearchParams(params);
+                            path += '?' + urlParams.toString();
+                            fullUrl += '?' + urlParams.toString();
+                            curlCommand = `curl -X ${method} "${fullUrl}"`;
+                        }
+                    } else {
+                        if (contentType === 'multipart/form-data') {
+                            const newFormData = new FormData();
+                            let formFields = [];
+                            for (let [key, value] of formData.entries()) {
+                                if (!key.startsWith('route_')) {
+                                    newFormData.append(key, value);
+                                    if (value instanceof File) {
+                                        formFields.push(`-F "${key}=@${value.name}"`);
+                                    } else {
+                                        formFields.push(`-F "${key}=${value}"`);
+                                    }
+                                }
+                            }
+                            axiosConfig.data = newFormData;
+                            axiosConfig.headers['Content-Type'] = 'multipart/form-data';
+                            curlCommand += ` \\\n  ${formFields.join(' \\\n  ')}`;
+                        } else if (contentType === 'application/json') {
+                            const bodyTextarea = form.querySelector('textarea[name="body"]');
+                            if (bodyTextarea && bodyTextarea.value.trim()) {
+                                try {
+                                    const jsonBody = JSON.parse(bodyTextarea.value);
+                                    axiosConfig.headers['Content-Type'] = 'application/json';
+                                    axiosConfig.data = jsonBody;
+                                    curlCommand += ` \\\n  -H "Content-Type: application/json" \\\n  -d '${JSON.stringify(jsonBody)}'`;
+                                } catch (e) {
+                                    throw new Error('Invalid JSON in request body');
+                                }
+                            } else {
+                                const jsonBody = {};
+                                for (let [key, value] of formData.entries()) {
+                                    if (key !== 'body' && !key.startsWith('route_') && value) {
+                                        jsonBody[key] = value;
+                                    }
+                                }
+                                if (Object.keys(jsonBody).length > 0) {
+                                    axiosConfig.headers['Content-Type'] = 'application/json';
+                                    axiosConfig.data = jsonBody;
+                                    curlCommand += ` \\\n  -H "Content-Type: application/json" \\\n  -d '${JSON.stringify(jsonBody)}'`;
+                                }
+                            }
+                        } else {
+                            const jsonBody = {};
+                            for (let [key, value] of formData.entries()) {
+                                if (key !== 'body' && !key.startsWith('route_') && value) {
+                                    jsonBody[key] = value;
+                                }
+                            }
+                            if (Object.keys(jsonBody).length > 0) {
+                                axiosConfig.headers['Content-Type'] = 'application/json';
+                                axiosConfig.data = jsonBody;
+                                curlCommand += ` \\\n  -H "Content-Type: application/json" \\\n  -d '${JSON.stringify(jsonBody)}'`;
+                            }
+                        }
+                    }
+
+                    const curlContent = document.getElementById(`curl-content-${endpointIndex}`);
+                    curlContent.textContent = curlCommand;
+                    curlElement.classList.remove('hidden');
+                    curlElement.classList.add('slide-down');
+
+                    responseContent.innerHTML = '<span class="text-white">Loading...</span>';
+                    responseElement.classList.remove('hidden');
+                    responseElement.classList.add('slide-down');
+
+                    const response = await axios(axiosConfig);
+                    const responseContentType = response.headers['content-type'] || '';
+
+                    const headerHtml = `<div class="text-gray-400 text-xs mb-3">
+                        <pre>Method: ${method}</pre>
+                        <pre>URL: ${fullUrl}</pre>
+                        <pre>Status: ${response.status} ${response.statusText}</pre>
+                    </div>`;
+
+                    if (responseContentType.includes('application/json')) {
+                        const jsonString = JSON.stringify(response.data, null, 2);
+                        const escapedJsonString = jsonString
+                            .replace(/&/g, '&amp;')
+                            .replace(/</g, '&lt;')
+                            .replace(/>/g, '&gt;')
+                            .replace(/"/g, '&quot;')
+                            .replace(/'/g, '&#39;');
+
+                        responseContent.innerHTML = headerHtml + `<pre class="text-white">${escapedJsonString}</pre>`;
+                        copyResponseButton.classList.remove('hidden');
+                    } else if (responseContentType.includes('image/')) {
+                        axiosConfig.responseType = 'blob';
+                        const blobResponse = await axios(axiosConfig);
+                        const imageUrl = URL.createObjectURL(blobResponse.data);
+                        responseContent.innerHTML = headerHtml + `
+                            <img src="${imageUrl}" alt="Response Image" class="max-w-full h-auto">
+                        `;
+                        copyResponseButton.classList.add('hidden');
+                    } else if (responseContentType.includes('audio/')) {
+                        axiosConfig.responseType = 'blob';
+                        const blobResponse = await axios(axiosConfig);
+                        const audioUrl = URL.createObjectURL(blobResponse.data);
+                        responseContent.innerHTML = headerHtml + `
+                            <div class="text-white mb-3">Audio Player:</div>
+                            <audio controls class="w-full mb-3">
+                                <source src="${audioUrl}" type="${responseContentType}">
+                                Your browser does not support the audio element.
+                            </audio>
+                            <div class="text-xs text-gray-400">
+                                <a href="${audioUrl}" download class="text-blue-400 hover:text-blue-300">Download Audio</a>
+                            </div>
+                        `;
+                        copyResponseButton.classList.add('hidden');
+                    } else if (responseContentType.includes('video/')) {
+                        axiosConfig.responseType = 'blob';
+                        const blobResponse = await axios(axiosConfig);
+                        const videoUrl = URL.createObjectURL(blobResponse.data);
+                        responseContent.innerHTML = headerHtml + `
+                            <div class="text-white mb-3">Video Player:</div>
+                            <video controls class="w-full max-h-64 mb-3">
+                                <source src="${videoUrl}" type="${responseContentType}">
+                                Your browser does not support the video element.
+                            </video>
+                            <div class="text-xs text-gray-400">
+                                <a href="${videoUrl}" download class="text-blue-400 hover:text-blue-300">Download Video</a>
+                            </div>
+                        `;
+                        copyResponseButton.classList.add('hidden');
+                    } else if (responseContentType.includes('application/pdf')) {
+                        axiosConfig.responseType = 'blob';
+                        const blobResponse = await axios(axiosConfig);
+                        const pdfUrl = URL.createObjectURL(blobResponse.data);
+                        responseContent.innerHTML = headerHtml + `
+                            <div class="text-white mb-3">PDF Document:</div>
+                            <iframe src="${pdfUrl}" class="w-full h-64 border border-gray-600 mb-3"></iframe>
+                            <div class="text-xs text-gray-400">
+                                <a href="${pdfUrl}" download class="text-blue-400 hover:text-blue-300">Download PDF</a>
+                            </div>
+                        `;
+                        copyResponseButton.classList.add('hidden');
+                    } else {
+                        responseContent.innerHTML = headerHtml + `<pre class="text-white whitespace-pre-wrap m-0">${response.data}</pre>`;
+                        copyResponseButton.classList.remove('hidden');
+                    }
+                } catch (error) {
+                    let errorMessage = error.message;
+                    let statusInfo = 'Error';
+
+                    if (error.response) {
+                        statusInfo = `${error.response.status} ${error.response.statusText}`;
+                        errorMessage = error.response.data?.message || error.response.data || error.message;
+                    } else if (error.request) {
+                        errorMessage = 'Network Error: ' + error.message;
+                    }
+
+                    responseContent.innerHTML = `
+                        <div class="text-gray-400 text-xs mb-3">
+                            <pre>Method: ${method}</pre>
+                            <pre>URL: ${fullUrl}</pre>
+                            <pre>Status: ${statusInfo}</pre>
+                        </div>
+                        <pre class="text-white">Error: ${errorMessage}</pre>
+                    `;
+                    responseElement.classList.remove('hidden');
+                    responseElement.classList.add('slide-down');
+                    copyResponseButton.classList.remove('hidden');
+                } finally {
+                    clearButton.classList.remove('hidden');
+                }
+            }
+
+            function applyFilters() {
+                const searchTerm = searchInput.value.toLowerCase().trim();
+                const apiItems = document.querySelectorAll('.api-item');
+                let visibleCount = 0;
+
+                apiItems.forEach(item => {
+                    const path = item.getAttribute('data-path').toLowerCase();
+                    const alias = item.getAttribute('data-alias').toLowerCase();
+
+                    const searchMatch = path.includes(searchTerm) || alias.includes(searchTerm);
+
+                    if (searchMatch) {
+                        item.style.display = 'block';
+                        visibleCount++;
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+
+                if (visibleCount === 0 && apiItems.length > 0) {
+                    noResults.style.display = 'block';
+                    apiList.style.display = 'none';
+                } else {
+                    noResults.style.display = 'none';
+                    apiList.style.display = 'block';
+                }
+            }
+
+            async function loadCategory() {
+                const setRes = await fetch('/set');
+                const setData = await setRes.json();
+                document.querySelector('meta[name="description"]').content = setData.description;
+                document.querySelector('link[rel="icon"]').href = setData.icon;
+                document.getElementById('footerCopyright').textContent = `© ${setData.name}. | All Rights Reserved.`;
+
+                const catPath = location.pathname.replace('/category/', '').toLowerCase();
+                const res = await fetch('/endpoints');
+                const { endpoints } = await res.json();
+                const category = endpoints.find(c => c.name.toLowerCase().replace(/\s+/g, '-') === catPath);
+                if (!category) {
+                    document.getElementById('noResults').innerHTML = '<div class="max-w-md mx-auto"><h3 class="text-xs text-gray-500 mb-2">Category not found.</h3></div>';
+                    document.getElementById('noResults').style.display = 'block';
+                    document.getElementById('apiList').style.display = 'none';
+                    return;
+                }
+                const capitalizedName = category.name.charAt(0).toUpperCase() + category.name.slice(1);
+                document.title = `${capitalizedName} - ${setData.name}.`;
+                document.getElementById('categoryTitle').textContent = capitalizedName;
+                document.getElementById('endpointCount').textContent = `${category.items.length} endpoints available`;
+                const apiList = document.getElementById('apiList');
+                apiList.innerHTML = '';
+                let index = 0;
+                for (const it of category.items) {
+                    const key = Object.keys(it)[0];
+                    const { desc, path, method = 'GET' } = it[key];
+                    const alias = key.replace(/-/g, ' ').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                    const [basePath, queryStr] = path.split('?');
+                    const params = queryStr ? queryStr.split('&').map(p => p.replace('=', '')) : [];
+                    let formHtml = '';
+                    if (params.length) {
+                        formHtml = params.map(param => `
+                            <div>
+                                <label class="block text-xs font-medium text-gray-300">
+                                    ${param} 
+                                    <span class="text-red-400">*</span>
+                                </label>
+                                <div class="text-xs text-gray-500 mb-1">
+                                    Input ${param}.
+                                </div>
+                                <input 
+                                    type="text" 
+                                    name="${param}" 
+                                    class="w-full px-3 py-2 border border-gray-700 bg-gray-900 text-sm focus:outline-none focus:border-blue-500 text-gray-100 placeholder:text-gray-500" 
+                                    placeholder="" 
+                                    required
+                                >
+                            </div>
+                        `).join('');
+                    }
+                    const div = document.createElement('div');
+                    div.classList.add('bg-gray-800', 'border', 'border-gray-700', 'api-item', 'hover:border-blue-500');
+                    div.dataset.method = method;
+                    div.dataset.path = basePath;
+                    div.dataset.alias = alias;
+                    div.innerHTML = `
+                        <button onclick="toggleEndpoint(${index})" class="w-full px-4 py-3 text-left flex items-center justify-between">
+                            <div class="flex items-center min-w-0 flex-1">
+                                <span class="inline-block px-3 py-1 text-xs font-semibold text-gray-100 mr-3 flex-shrink-0 bg-blue-600">
+                                    ${method}
+                                </span>
+                                <div class="flex flex-col min-w-0 flex-1">
+                                    <span class="font-semibold truncate max-w-[90%] font-mono text-sm text-gray-100" title="${basePath}">${basePath}</span>
+                                    <span class="text-xs text-gray-500 truncate max-w-[90%]" title="${alias}">${alias}</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 flex-shrink-0">
+                                <span class="material-icons transition-transform duration-150" id="endpoint-icon-${index}">expand_more</span>
+                            </div>
+                        </button>
+                        <div id="endpoint-${index}" class="hidden bg-gray-800 p-4 border-t border-gray-700">
+                            <div>
+                                <div class="text-gray-300 font-bold text-xs mb-2 flex items-center">
+                                    <span class="material-icons text-sm mr-1">play_arrow</span>
+                                    TRY IT OUT
+                                </div>
+                                <div>
+                                    <form id="form-${index}" onsubmit="executeRequest(event, ${index}, '${method}', '${basePath}', 'application/json')">
+                                        <div class="mb-4 space-y-2">
+                                            ${formHtml}
+                                        </div>
+                                        <button type="submit" class="bg-blue-600 hover:bg-blue-500 font-semibold text-gray-100 px-6 py-2 text-xs font-medium transition-colors duration-150 disabled:bg-gray-600 disabled:cursor-not-allowed" >
+                                            Execute
+                                        </button>
+                                        <button type="button" id="clear-${index}" onclick="clearResponse(${index})" class="hidden bg-gray-800 border border-gray-700 hover:border-blue-500 font-semibold text-gray-100 px-6 py-2 text-xs font-medium transition-colors duration-150 ml-2">
+                                            Clear
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                            <div id="response-${index}" class="hidden mt-4">
+                                <div class="text-gray-300 font-bold text-xs mb-2 flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <span class="material-icons text-sm mr-1">code</span>
+                                        RESPONSE
+                                    </div>
+                                    <button id="copy-response-${index}" onclick="copyToClipboard('response-content-${index}')" class="text-gray-400 hover:text-white flex items-center hidden">
+                                        <span class="material-icons text-sm">content_copy</span>
+                                    </button>
+                                </div>
+                                <div class="bg-gray-900 text-white text-xs p-4">
+                                    <div class="bg-gray-900 max-h-80 overflow-auto" id="response-content-${index}"></div>
+                                </div>
+                            </div>
+                            <div id="curl-${index}" class="hidden mt-4">
+                                <div class="text-gray-300 font-bold text-xs mb-2 flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <span class="material-icons text-sm mr-1">terminal</span>
+                                        CURL COMMAND
+                                    </div>
+                                    <button onclick="copyToClipboard('curl-content-${index}')" class="text-gray-400 hover:text-white flex items-center">
+                                        <span class="material-icons text-sm">content_copy</span>
+                                    </button>
+                                </div>
+                                <div class="bg-gray-900 text-white text-xs p-4">
+                                    <pre class="text-white whitespace-pre-wrap overflow-auto max-h-40" id="curl-content-${index}"></pre>
+                                </div>
+                            </div>
+                            <div class="mt-4 space-y-4">
+                                <div>
+                                    <div class="text-gray-300 font-bold text-xs mb-2 flex items-center">
+                                        <span class="material-icons text-sm mr-1">list</span>
+                                        HTTP STATUS CODES
+                                    </div>
+                                    <div class="bg-gray-800 border border-gray-700">
+                                        <div class="overflow-x-auto">
+                                            <table class="w-full text-xs">
+                                                <thead class="bg-gray-700 border-b border-gray-800">
+                                                    <tr>
+                                                        <th class="px-4 py-2 text-left font-semibold text-gray-300">Code</th>
+                                                        <th class="px-4 py-2 text-left font-semibold text-gray-300">Description</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody class="divide-y divide-gray-800">
+                                                    <tr class="hover:bg-gray-700">
+                                                        <td class="px-4 py-2">
+                                                            <div class="flex items-center">
+                                                                <span class="material-icons text-green-400 text-sm mr-2">check_circle</span>
+                                                                <span class="font-mono font-semibold text-green-400">200</span>
+                                                            </div>
+                                                        </td>
+                                                        <td class="px-4 py-2 text-gray-400">OK - Request successful</td>
+                                                    </tr>
+                                                    <tr class="hover:bg-gray-700">
+                                                        <td class="px-4 py-2">
+                                                            <div class="flex items-center">
+                                                                <span class="material-icons text-red-400 text-sm mr-2">error</span>
+                                                                <span class="font-mono font-semibold text-red-400">400</span>
+                                                            </div>
+                                                        </td>
+                                                        <td class="px-4 py-2 text-gray-400">Bad Request - Invalid parameters or missing required fields</td>
+                                                    </tr>
+                                                    <tr class="hover:bg-gray-700">
+                                                        <td class="px-4 py-2">
+                                                            <div class="flex items-center">
+                                                                <span class="material-icons text-red-400 text-sm mr-2">error</span>
+                                                                <span class="font-mono font-semibold text-red-400">405</span>
+                                                            </div>
+                                                        </td>
+                                                        <td class="px-4 py-2 text-gray-400">Method Not Allowed - HTTP method not supported</td>
+                                                    </tr>
+                                                    <tr class="hover:bg-gray-700">
+                                                        <td class="px-4 py-2">
+                                                            <div class="flex items-center">
+                                                                <span class="material-icons text-yellow-400 text-sm mr-2">warning</span>
+                                                                <span class="font-mono font-semibold text-yellow-400">429</span>
+                                                            </div>
+                                                        </td>
+                                                        <td class="px-4 py-2 text-gray-400">Too Many Requests - Rate limit exceeded</td>
+                                                    </tr>
+                                                    <tr class="hover:bg-gray-700">
+                                                        <td class="px-4 py-2">
+                                                            <div class="flex items-center">
+                                                                <span class="material-icons text-red-400 text-sm mr-2">error</span>
+                                                                <span class="font-mono font-semibold text-red-400">500</span>
+                                                            </div>
+                                                        </td>
+                                                        <td class="px-4 py-2 text-gray-400">Internal Server Error - Server encountered an error</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    apiList.appendChild(div);
+                    index++;
+                }
+            }
+
+            window.addEventListener('load', () => {
+                searchInput = document.getElementById('searchInput');
+                noResults = document.getElementById('noResults');
+                apiList = document.getElementById('apiList');
+
+                searchInput.addEventListener('input', applyFilters);
+
+                loadCategory();
+            });
+        </script>
+    </main>
+</body>
+</html>
