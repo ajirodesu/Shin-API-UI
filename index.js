@@ -29,10 +29,8 @@ const chalk = require('chalk');
     const originalJson = res.json;
     res.json = function (data) {
       if (data && typeof data === 'object') {
-        const statusCode = res.statusCode || 200;
         const responseData = {
           status: data.status,
-          statusCode,
           creator: (set.author || '').toLowerCase(),
           ...data,
         };
