@@ -2,7 +2,7 @@ const meta = {
   name: 'lyrics',
   desc: 'retrieves lyrics for a specified song and artist',
   method: 'get',
-  category: 'entertainment',
+  category: 'search',
   params: ['artist', 'song'],
 };
 
