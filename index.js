@@ -103,6 +103,8 @@ const chalk = require('chalk');
               [mod.meta.name || name]: {
                 desc: mod.meta.desc || mod.meta.description || 'No description provided',
                 path: displayPath,
+                method: mod.meta.method?.toUpperCase() || 'GET',
+                guide: mod.meta.guide || {}
               },
             });
 
@@ -134,8 +136,8 @@ const chalk = require('chalk');
   });
 
   app.get('/category/:category', (req, res) => {
-  res.sendFile(path.join(__dirname, 'docs', 'category.html'));
-});
+    res.sendFile(path.join(__dirname, 'docs', 'category.html'));
+  });
 
   app.get('/set', (req, res) => {
     res.json({ status: true, ...set });

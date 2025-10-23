@@ -3,7 +3,11 @@ const meta = {
   desc: 'retrieves lyrics for a specified song and artist',
   method: 'get',
   category: 'search',
-  params: ['artist', 'song'],
+  guide: {
+    artist: 'The artist of the song',
+    song: 'The title of the song',
+  },
+  params: ['artist', 'song']
 };
 
 async function onStart({ req, res }) {
