@@ -3,7 +3,7 @@
 > Interactive REST API documentation + sandbox UI for simple, file-based API endpoints.
 > **Live demo:** [https://shin-apis.onrender.com/](https://shin-apis.onrender.com/)
 
-Shin API UI is a lightweight interface for documenting and exposing small REST endpoints as individual `.js` files under an `api/` folder. It’s inspired by and built on top of Rynn’s simple API UI approach — special thanks to rynn-k for the original project.
+Shin API UI is a lightweight interface for documenting and exposing small REST endpoints as individual `.js` files under an `api/` folder. It’s inspired by and built on top of Rynn’s simple API UI approach [https://github.com/rynn-k/Rynn-UI](https://github.com/rynn-k/Rynn-UI) — special thanks to rynn-k for the original project.
 
 # Table of contents
 
