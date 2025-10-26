@@ -90,6 +90,7 @@ const meta = {
   desc: 'Returns a greeting message',
   method: 'get',            // HTTP method (get, post, put, delete, etc.)
   category: 'examples',     // used to group endpoints in the sidebar
+  guide:['add a name'],
   params: ['name']          // parameter names expected by the endpoint
 };
 
