@@ -272,6 +272,24 @@
             }, 150);
         }
 
+        function fallbackCopy(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.position = "fixed";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                const successful = document.execCommand('copy');
+                console.log('Fallback: Copying text command was ' + (successful ? 'successful' : 'unsuccessful'));
+            } catch (err) {
+                console.error('Fallback: Oops, unable to copy', err);
+            }
+            document.body.removeChild(textArea);
+        }
+
         function copyToClipboard(elementId) {
             const element = document.getElementById(elementId);
             let text = '';
@@ -285,10 +303,16 @@
                 text = element.textContent.replace(/\s*\\\n\s*/g, ' \\\n  ').trim();
             }
 
+            if (!navigator.clipboard) {
+                fallbackCopy(text);
+                return;
+            }
+
             navigator.clipboard.writeText(text).then(() => {
                 console.log('Copied to clipboard');
             }).catch(err => {
                 console.error('Failed to copy: ', err);
+                fallbackCopy(text);
             });
         }
 
@@ -424,7 +448,7 @@
 
                     responseContent.innerHTML = headerHtml + `<pre class="text-white">${escapedJsonString}</pre>`;
                     copyResponseButton.classList.remove('hidden');
-                    copyResponseButton.onclick = () => copyToClipboard('response-content-${endpointIndex}');
+                    copyResponseButton.onclick = () => copyToClipboard(`response-content-${endpointIndex}`);
                     copyResponseButton.innerHTML = '<span class="material-icons text-sm">content_copy</span>';
                 } else if (responseContentType.includes('image/')) {
                     axiosConfig.responseType = 'blob';
@@ -498,7 +522,7 @@
                 } else {
                     responseContent.innerHTML = headerHtml + `<pre class="text-white whitespace-pre-wrap m-0">${response.data}</pre>`;
                     copyResponseButton.classList.remove('hidden');
-                    copyResponseButton.onclick = () => copyToClipboard('response-content-${endpointIndex}');
+                    copyResponseButton.onclick = () => copyToClipboard(`response-content-${endpointIndex}`);
                     copyResponseButton.innerHTML = '<span class="material-icons text-sm">content_copy</span>';
                 }
             } catch (error) {
