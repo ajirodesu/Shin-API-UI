@@ -1,9 +1,13 @@
+Got it — I restored the GitHub references. Below is the README with the live site links kept **and** all GitHub-related links/instructions restored.
+
+---
+
 # Shin API UI
 
 > Interactive REST API documentation + sandbox UI for file-based API endpoints.
-> **Live demo:** [shin-api-ui.vercel.app](shin-api-ui.vercel.app)
+> **Live demo:** [https://shin-api-ui.vercel.app/](https://shin-api-ui.vercel.app/)
 >
-> **Note:** Shin API UI is the successor of **Wataru API** ([https://github.com/ajirodesu/wataru-api](https://github.com/ajirodesu/wataru-api)). It preserves compatibility with Wataru-style endpoint files and supports both the Shin `meta` format and Wataru's `meta.path` conventions.
+> **Note:** Shin API UI is the successor of Wataru API ([https://github.com/ajirodesu/wataru-api](https://github.com/ajirodesu/wataru-api)). It preserves compatibility with Wataru-style endpoint files and supports both the Shin `meta` format and Wataru's `meta.path` conventions.
 
 ---
 
@@ -16,7 +20,7 @@
 * `settings.js` — configuration (example + field reference)
 * Endpoint file format / template (Wataru-compatible)
 * Example: `hello.js` (Wataru-style path example)
-* Example: `lyrics.js`)
+* Example: `lyrics.js`
 * How to call / test an endpoint (live example)
 * Response format conventions & best practices
 * Deploying
@@ -48,7 +52,7 @@ This project is the successor to Wataru API ([https://github.com/ajirodesu/watar
 * Standard JSON response patterns (200, 400, 404, 500) by convention.
 * Customizable `settings.js` for branding, links, and notifications.
 * Ready to deploy on Vercel / Render / any Node host.
-* Live demo: [shin-api-ui.vercel.app/](shin-api-ui.vercel.app/)
+* Live demo: [https://shin-api-ui.vercel.app/](https://shin-api-ui.vercel.app/)
 
 ---
 
@@ -193,7 +197,7 @@ module.exports = { meta, onStart };
 
 ---
 
-# Example: `lyrics.js`)
+# Example: `lyrics.js`
 
 ```js
 // api/lyrics.js
@@ -252,7 +256,7 @@ GET https://shin-api-ui.vercel.app/search/lyrics?artist=Adele&song=Hello
 **curl example (live):**
 
 ```bash
-curl "shin-api-ui.vercel.app/search/lyrics?artist=Adele&song=Hello"
+curl "https://shin-api-ui.vercel.app/search/lyrics?artist=Adele&song=Hello"
 ```
 
 **Example responses:**
@@ -296,25 +300,27 @@ curl "shin-api-ui.vercel.app/search/lyrics?artist=Adele&song=Hello"
 # Deploying
 
 * The repo is compatible with Vercel, Render, and other Node hosts.
-* For the public demo, see: [shin-api-ui.vercel.app/](shin-api-ui.vercel.app/)
-* On hosts like Render or Vercel, connect the GitHub repo and follow their deployment flow. Ensure `index.js` and `package.json` `start` script are correct.
+* For the public demo, see: [https://shin-api-ui.vercel.app/](https://shin-api-ui.vercel.app/)
+* On hosts like Render or Vercel, connect the GitHub repo ([https://github.com/ajirodesu/Shin-API-UI](https://github.com/ajirodesu/Shin-API-UI)) and follow their deployment flow. Ensure `index.js` and `package.json` `start` script are correct.
 
 ---
 
 # Contributing & credits
 
-This project is based on Rynn’s REST API UI design — special thanks to [https://github.com/rynn-k](https://github.com/rynn-k) for the original project. The repository `Shin-API-UI` is an adaptation and extension by `ajirodesu`.
+This project is based on Rynn’s REST API UI design — special thanks to Rynn for the original project design and inspiration.
 
 Contributing guidelines:
 
-1. Fork the repo.
+1. Fork the repo: [https://github.com/ajirodesu/Shin-API-UI](https://github.com/ajirodesu/Shin-API-UI)
 2. Add your API file(s) to `/api`.
 3. Open a pull request with a short description of the endpoint(s) you added.
+
+You can also find downloadable templates and documentation on the live site: [https://shin-api-ui.vercel.app/](https://shin-api-ui.vercel.app/)
 
 ---
 
 # License
 
-This project is MIT licensed (see the `LICENSE` file in the repo).
+This project is MIT licensed (see the `LICENSE` file in the repository / accessible from the GitHub repo: [https://github.com/ajirodesu/Shin-API-UI](https://github.com/ajirodesu/Shin-API-UI)).
 
 ---
