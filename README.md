@@ -1,7 +1,7 @@
 # Shin API UI
 
 > Interactive REST API documentation + sandbox UI for file-based API endpoints.
-> **Live demo:** [https://shin-apis.onrender.com/](https://shin-apis.onrender.com/)
+> **Live demo:** [shin-api-ui.vercel.app/](shin-api-ui.vercel.app/)
 >
 > **Note:** Shin API UI is the successor of **Wataru API** ([https://github.com/ajirodesu/wataru-api](https://github.com/ajirodesu/wataru-api)). It preserves compatibility with Wataru-style endpoint files and supports both the Shin `meta` format and Wataru's `meta.path` conventions.
 
@@ -48,7 +48,7 @@ This project is the successor to Wataru API ([https://github.com/ajirodesu/watar
 * Standard JSON response patterns (200, 400, 404, 500) by convention.
 * Customizable `settings.js` for branding, links, and notifications.
 * Ready to deploy on Vercel / Render / any Node host.
-* Live demo: [https://shin-apis.onrender.com/](https://shin-apis.onrender.com/)
+* Live demo: [shin-api-ui.vercel.app/](shin-api-ui.vercel.app/)
 
 ---
 
@@ -252,7 +252,7 @@ GET https://shin-apis.onrender.com/search/lyrics?artist=Adele&song=Hello
 **curl example (live):**
 
 ```bash
-curl "https://shin-apis.onrender.com/api/lyrics?artist=Adele&song=Hello"
+curl "shin-api-ui.vercel.app/search/lyrics?artist=Adele&song=Hello"
 ```
 
 **Example responses:**
@@ -296,7 +296,7 @@ curl "https://shin-apis.onrender.com/api/lyrics?artist=Adele&song=Hello"
 # Deploying
 
 * The repo is compatible with Vercel, Render, and other Node hosts.
-* For the public demo, see: [https://shin-apis.onrender.com/](https://shin-apis.onrender.com/)
+* For the public demo, see: [shin-api-ui.vercel.app/](shin-api-ui.vercel.app/)
 * On hosts like Render or Vercel, connect the GitHub repo and follow their deployment flow. Ensure `index.js` and `package.json` `start` script are correct.
 
 ---
