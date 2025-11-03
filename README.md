@@ -1,7 +1,7 @@
 # Shin API UI
 
 > Interactive REST API documentation + sandbox UI for file-based API endpoints.
-> **Live demo:** [shin-api-ui.vercel.app/](shin-api-ui.vercel.app/)
+> **Live demo:** [shin-api-ui.vercel.app](shin-api-ui.vercel.app)
 >
 > **Note:** Shin API UI is the successor of **Wataru API** ([https://github.com/ajirodesu/wataru-api](https://github.com/ajirodesu/wataru-api)). It preserves compatibility with Wataru-style endpoint files and supports both the Shin `meta` format and Wataru's `meta.path` conventions.
 
