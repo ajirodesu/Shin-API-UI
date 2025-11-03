@@ -246,7 +246,7 @@ GET http://localhost:<PORT>/<category>/<endpoint>?param1=value1&param2=value2
 **Live example (public)**
 
 ```
-GET https://shin-apis.onrender.com/search/lyrics?artist=Adele&song=Hello
+GET https://shin-api-ui.vercel.app/search/lyrics?artist=Adele&song=Hello
 ```
 
 **curl example (live):**
