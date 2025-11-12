@@ -1,7 +1,3 @@
-Got it — I restored the GitHub references. Below is the README with the live site links kept **and** all GitHub-related links/instructions restored.
-
----
-
 # Shin API UI
 
 > Interactive REST API documentation + sandbox UI for file-based API endpoints.
